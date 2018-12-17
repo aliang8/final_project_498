@@ -9,24 +9,17 @@ Several steps are necessary to run this code.
     ```
     final_project_eecs498
       ├── README.md
-      ├── __pycache__
-      │   ├── dataset.cpython-37.pyc
-      │   ├── local_net.cpython-37.pyc
-      │   ├── network_t2.cpython-37.pyc
-      │   ├── train_common.cpython-37.pyc
-      │   └── utils.cpython-37.pyc
       ├── checkpoints
       │   ├── inception_v3
       │   └── local_net
       │       └── local_net.param
-      ├── config.json
+      ├── config.json 
       ├── data
       │   ├── classes.csv
       │   ├── ssd_features.txt
       │   ├── xyz_train.txt
       │   └── xyz_valid.txt
       ├── dataset.py
-      ├── eecs498.pem
       ├── local_net.py
       ├── predict.py
       ├── predict_inception.py
@@ -34,12 +27,19 @@ Several steps are necessary to run this code.
       ├── preds
       │   ├── predictions.csv
       │   └── result.csv
-      ├── rootkey.csv
       ├── starter.py
       ├── train_common.py
       ├── train_inception.py
       ├── train_local_net.py
       └── utils.py
-        ...
     ```
-3. 
+3. Task 1: Image Classification
+- To train network run: 
+
+## Task 2: Localization
+1. To train local-net run: `python3 train_local_net.py`. This will save weight params to `checkpoints/local_net/local_net.param`
+
+2. To predict on test data: 
+- Run SSD mxnet and generate 2D features on the test dataset.
+- Save features in text file called `data/ssd_features.txt`
+- Run `python3 predict_local_net.py` to produce `preds/predictions.csv`
