@@ -1,6 +1,3 @@
-#! /usr/bin/python3
-from __future__ import print_function, division
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -37,7 +34,7 @@ def _train_epoch(data_loader, model, criterion, optimizer):
 
         # forward + backward + optimize
         output = model(X)
-        loss = criterion(output, y)
+        loss = criterion(output[0], y)
         loss.backward()
         optimizer.step()
 
@@ -98,70 +95,54 @@ def _evaluate_epoch(tr_loader, va_loader, model, criterion, epoch, stats):
     print('Val loss: {}'.format(val_loss))
 
 def main():
-
-    classes = (
-        'Unknown', 'Compacts', 'Sedans', 'SUVs', 'Coupes',
-        'Muscle', 'SportsClassics', 'Sports', 'Super', 'Motorcycles',
-        'OffRoad', 'Industrial', 'Utility', 'Vans', 'Cycles',
-        'Boats', 'Helicopters', 'Planes', 'Service', 'Emergency',
-        'Military', 'Commercial', 'Trains'
-    )
-
-    # VGG-16 Takes 224x224 images as input, so we resize all of them
-    composed = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-    ])
-
     print('Data loaders')
-    tr_loader, va_loader, te_loader, _ = get_train_val_test_loaders(composed, num_classes=config('vgg.num_classes'))
+    tr_loader, va_loader, te_loader, _ = get_train_val_test_loaders(num_classes=config('inception_v3.num_classes'))
 
     print('Load pretrained ...')
+
     # Load the pretrained model from pytorch
-    vgg16 = models.vgg16_bn(pretrained = True)
-    vgg16.load_state_dict(torch.load("vgg16_bn-6c64b313.pth"))
-    print(vgg16.classifier[6].out_features) # 1000 
-
-    # Freeze training for all layers
-    for param in vgg16.features.parameters():
-        param.require_grad = False
-
-    num_features = vgg16.classifier[6].in_features
-    features = list(vgg16.classifier.children())[:-1] # Remove last layer
-    features.extend([nn.Linear(num_features, len(classes))]) # Add our layer with 4 outputs
-    vgg16.classifier = nn.Sequential(*features) # Replace the model classifier
-
-    # Use GPU
-    if use_gpu:
-        vgg16.cuda() 
+    model = torchvision.models.inception_v3(pretrained=True)
+    num_ftrs = model.fc.in_features
+    model.fc = torch.nn.Linear(num_ftrs, 2)
         
     # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
 
-    optimizer = optim.SGD(vgg16.parameters(), lr=0.001, momentum=0.9)
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=config('inception_v3.learning_rate'), weight_decay=0.0005)
+    # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    # # scheduler = lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.1)
+    # scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     print('Restore checkpoint...')
-    model, start_epoch, stats = restore_checkpoint(vgg16, config('vgg.checkpoint'))
+    model, start_epoch, stats = restore_checkpoint(model, config('inception_v3.checkpoint'))
 
-    # Evaluate the randomly initialized model
-    _evaluate_epoch(tr_loader, va_loader, model, criterion, start_epoch,
-        stats)
+    # Use GPU
+    if use_gpu:
+        model.cuda() 
 
-    save_checkpoint(model, start_epoch, config('vgg.checkpoint'), stats)
-    
     # Loop over the entire dataset multiple times
-    for epoch in range(start_epoch, config('vgg.num_epochs')):
+    for epoch in range(start_epoch, config('inception_v3.num_epochs')):
+
+        # scheduler.step()
+
+        print('Training Epoch: {}'.format(epoch))
+        start = time.time()
+
         # Train model
         _train_epoch(tr_loader, model, criterion, optimizer)
-        
+
+        print('Time for training: {}'.format(time.time() - start))
+
+
+        print('Evaluating Epoch: {}'.format(epoch))        
+        start = time.time()
+
         # Evaluate model
         _evaluate_epoch(tr_loader, va_loader, model, criterion, epoch+1, stats)
+        print('Time for evaluating: {}'.format(time.time() - start))
 
         # Save model parameters
-        save_checkpoint(model, epoch+1, config('vgg.checkpoint'), stats)
+        save_checkpoint(model, epoch+1, config('inception_v3.checkpoint'), stats)
 
 if __name__ == '__main__':
     main()

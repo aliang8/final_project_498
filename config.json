@@ -2,11 +2,18 @@
     "csv_file": "data/dogs.csv",
     "image_path": "data/images/",
     "image_dim": 64,
-    "vgg": {
-        "checkpoint": "./checkpoints/vgg/",
+    "inception_v3": {
+        "checkpoint": "./checkpoints/inception_v3/",
         "learning_rate": 1e-5,
-        "num_epochs": 10,
-        "batch_size": 128,
-        "num_classes": 23
+        "num_epochs": 24,
+        "batch_size": 32,
+        "num_classes": 2
+    },
+    "local_net": {
+        "checkpoint": "./checkpoints/local_net/",
+        "learning_rate": 1e-2,
+        "weight_decay": 0.0005,
+        "num_epochs": 1000,
+        "batch_size": 512,
     }
 }
