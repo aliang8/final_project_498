@@ -15,5 +15,4 @@
         "weight_decay": 0.0005,
         "num_epochs": 1000,
         "batch_size": 512,
-    }
 }
