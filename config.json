@@ -6,7 +6,7 @@
         "checkpoint": "./checkpoints/inception_v3/",
         "learning_rate": 1e-5,
         "num_epochs": 24,
-        "batch_size": 32,
+        "batch_size": 64,
         "num_classes": 2
     },
     "local_net": {
@@ -15,4 +15,5 @@
         "weight_decay": 0.0005,
         "num_epochs": 1000,
         "batch_size": 512,
+    }
 }

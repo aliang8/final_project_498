@@ -1,2 +1,4 @@
 deploy/*
 checkpoints/*
+eecs498.pem
+rootkey.csv

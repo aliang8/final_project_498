@@ -53,14 +53,14 @@ def _evaluate_epoch(tr_loader, va_loader, model, criterion, epoch, stats):
                 X = X.cuda()
                 y = y.cuda()
 
-            output = model(X)
+            output = model(X)[0]
             predicted = predictions(output.data)
             y_true.append(y)
             y_pred.append(predicted)
             total += y.size(0)
             correct += (predicted == y).sum().item()
             running_loss.append(criterion(output, y).item())
-
+            # print(running_loss)
             del X, y
 
         train_loss = np.mean(running_loss)
@@ -75,7 +75,7 @@ def _evaluate_epoch(tr_loader, va_loader, model, criterion, epoch, stats):
                 X = X.cuda()
                 y = y.cuda()
 
-            output = model(X)
+            output = model(X)[0]
             predicted = predictions(output.data)
             y_true.append(y)
             y_pred.append(predicted)
