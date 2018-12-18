@@ -2,3 +2,6 @@ deploy/*
 checkpoints/*
 eecs498.pem
 rootkey.csv
+.DS_Store
+__pycache__
+starter.py
