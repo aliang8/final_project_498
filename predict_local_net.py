@@ -1,3 +1,9 @@
+"""
+EECS 498 - Self Driving Cars
+University of Michigan
+Inference for localization task
+"""
+
 import numpy as np
 import pandas as pd
 import csv
@@ -50,7 +56,7 @@ def main():
     prediction = model(test_features)
 
     # Write output to csv 
-    with open('predictions.csv', 'w+') as pred:
+    with open('pred_localization.csv', 'w+') as pred:
         w = csv.writer(pred)
 
         # header

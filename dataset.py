@@ -27,32 +27,6 @@ def get_train_val_dataset(num_classes):
     tr = CarDataset('train', num_classes)
     va = CarDataset('val', num_classes)
     te = CarDataset('test', num_classes)
-    # sometimes = lambda aug: iaa.Sometimes(0.5, aug)
-    # seq = iaa.Sequential(
-    #     [
-    #         # apply the following augmenters to most images
-    #         iaa.Fliplr(0.5), # horizontally flip 50% of all images
-    #         iaa.Flipud(0.2), # vertically flip 20% of all images
-    #         sometimes(iaa.Affine(
-    #             scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, # scale images to 80-120% of their size, individually per axis
-    #             translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}, # translate by -20 to +20 percent (per axis)
-    #             rotate=(-45, 45), # rotate by -45 to +45 degrees
-    #         )),
-    #     ],
-    #     random_order=True
-    # )
-
-    # print(tr.X[0].shape)
-
-    # aug_1 = seq.augment_images(tr.X)
-    # # aug_2 = seq.augment_images(tr.X)
-
-    # tr.X = np.append(tr.X, aug_1, axis=0)
-    # # tr.X = np.append(tr.X, aug_2, axis=0)
-
-    # tr.y = np.append(tr.y, tr.y)
-    # # tr.y = np.append(tr.y, tr.y)
-    # print(tr.X.shape)
     return tr, va, te
         
 class CarDataset(Dataset):
@@ -98,20 +72,7 @@ class CarDataset(Dataset):
         self.labels[np.where(self.labels == 1)] = 0
         self.labels[np.where(self.labels == 2)] = 1
 
-        # for snapshot in self.files:
-        #     try:
-        #         bbox = np.fromfile(snapshot.replace('_image.jpg', '_bbox.bin'), dtype=np.float32)
-        #         label = int(bbox[-2])
-        #         self.labels.append(label)
-        #     except FileNotFoundError:
-        #         bbox = np.array([], dtype=np.float32)
-        #         self.labels.append('')
-
-        # tf = transforms.Compose([
-        #     transforms.ToPILImage(),
-        #     transforms.Resize((224, 224)),
-        #     transforms.ToTensor()
-        # ])
+        # Apply image transformation for inception 
         self.tf = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((299, 299)),

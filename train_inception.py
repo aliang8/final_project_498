@@ -1,3 +1,9 @@
+"""
+EECS 498 - Self Driving Cars
+University of Michigan
+Training file for Inceptionv3 model
+"""
+
 import torch
 import torch.nn as nn
 import torch.optim as optim

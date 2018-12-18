@@ -1,3 +1,9 @@
+"""
+EECS 498 - Self Driving Cars
+University of Michigan
+Training for Localization network
+"""
+
 import numpy as np
 import pandas as pd
 import torch

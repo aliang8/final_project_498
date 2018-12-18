@@ -1,3 +1,9 @@
+"""
+EECS 498 - Self Driving Cars
+University of Michigan
+Network for localization task
+"""
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
