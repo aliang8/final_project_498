@@ -97,7 +97,7 @@ class CarDataset(Dataset):
 
         labels = []
 
-        with open('classes.csv', mode='r') as csv_file:
+        with open('data/classes.csv', mode='r') as csv_file:
             csv_reader = csv.DictReader(csv_file)
 
             for row in csv_reader:
@@ -124,9 +124,3 @@ class CarDataset(Dataset):
         the numberic label 1 maps to the semantic label 'miniature_poodle').
         """
         return self.semantic_labels[numeric_label]
-
-if __name__ == '__main__':
-    ## Future note: check scipy imread and imresize
-    import warnings
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-

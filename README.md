@@ -17,8 +17,8 @@ Several steps are necessary to run this code.
       ├── data
       │   ├── classes.csv
       │   ├── ssd_features.txt
-      │   ├── xyz_train.txt
-      │   └── xyz_valid.txt
+      │   ├── train_feats.txt
+      │   └── valid_feats.txt
       ├── dataset.py
       ├── local_net.py
       ├── predict.py
@@ -35,9 +35,9 @@ Several steps are necessary to run this code.
 
 ## Task 1: Image Classification
 
-** To use pretrained weights:
-- [Download epoch1](https://drive.google.com/open?id=1HAxcSTTQBy0LLZHBRVzqa2_dPeu0YXFQ)
-- [Download epoch2](https://drive.google.com/open?id=19-0uVlXdnW1hJOB4vghzf6vxeKROHeaq)
+*To use pretrained weights:*
+- [Download epoch1 (100MB)](https://drive.google.com/open?id=1HAxcSTTQBy0LLZHBRVzqa2_dPeu0YXFQ)
+- [Download epoch2 (100MB)](https://drive.google.com/open?id=19-0uVlXdnW1hJOB4vghzf6vxeKROHeaq)
 
 1. To train network run: `python3 train_inception.py`. This will save weights to `checkpoints/inception_v3/`
 
@@ -54,4 +54,4 @@ Several steps are necessary to run this code.
 - Run `python3 predict_local_net.py` to produce `preds/pred_localization.csv`
 
 
-*Note: If training/prediction doesn't work because of CUDA error try decreasing batch size. Training on CPU is very very slow.*
+*Note: If training/prediction doesn't work because of CUDA memory error try decreasing batch size. Training on CPU is very very slow.*

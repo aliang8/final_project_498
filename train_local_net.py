@@ -54,16 +54,18 @@ def main():
 	model = LocalizationNet()
 
 	# Read data 
-	train_data = pd.read_csv('data/xyz_train.txt', header=None)
-	valid_data = pd.read_csv('data/xyz_valid.txt', header=None)
+	tr = pd.read_csv('data/train_feats.txt', header=None)
+	val = pd.read_csv('data/val_feats.txt', header=None)
 
-	all_features = pd.concat((train_data.iloc[:, 1: -3], valid_data.iloc[:, 1: -3]))
-	all_labels = pd.concat((train_data.iloc[:, -3:], valid_data.iloc[:, -3:]))
+	all_features = pd.concat((tr.iloc[:, 1: -3], val.iloc[:, 1: -3]))
+	all_labels = pd.concat((tr.iloc[:, -3:], val.iloc[:, -3:]))
+	
 	numeric_features = all_features.dtypes[all_features.dtypes != 'object'].index
-	all_features[numeric_features] = all_features[numeric_features].apply(
-		lambda x: (x - x.mean()) / (x.std()))
 
-	n_train = train_data.shape[0]
+	# normalize numeric features
+	all_features[numeric_features] = all_features[numeric_features].apply(lambda x: (x - x.mean()) / (x.std()))
+
+	n_train = tr.shape[0]
 	train_X = np.array(all_features[:n_train].values)
 	val_X = np.array(all_features[n_train:].values)
 	train_y = np.array(all_labels[:n_train].values)
