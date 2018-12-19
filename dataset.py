@@ -13,27 +13,32 @@ from torchvision import datasets, models, transforms
 from imgaug import augmenters as iaa
 import imgaug as ia
 
-def get_train_val_test_loaders(num_classes):
-    tr, va, te = get_train_val_dataset(num_classes=num_classes)
+def get_train_val_test_loaders(net, num_classes):
+    tr, va, te = get_train_val_dataset(net, num_classes=num_classes)
     
-    batch_size = config('inception_v3.batch_size')
+    batch_size = config(net + '.batch_size')
     tr_loader = DataLoader(tr, batch_size=batch_size, shuffle=True)
     va_loader = DataLoader(va, batch_size=batch_size, shuffle=False)
     te_loader = DataLoader(te, batch_size=batch_size, shuffle=False)
     
     return tr_loader, va_loader, te_loader, tr.get_semantic_label
 
-def get_train_val_dataset(num_classes):
-    tr = CarDataset('train', num_classes)
-    va = CarDataset('val', num_classes)
-    te = CarDataset('test', num_classes)
+def get_train_val_dataset(net, num_classes):
+    tr = CarDataset('train', net, num_classes)
+    va = CarDataset('val', net, num_classes)
+    te = CarDataset('test', net, num_classes)
     return tr, va, te
         
 class CarDataset(Dataset):
 
-    def __init__(self, partition, num_classes):
+    def __init__(self, partition, net, num_classes):
 
         super().__init__()
+
+        if net == 'inception_v3':
+            size = (299, 299)
+        elif net == 'resnet18': 
+            size = (224, 224)
         
         if partition not in ['train', 'val', 'test']:
             raise ValueError('Partition {} does not exist'.format(partition))
@@ -75,18 +80,15 @@ class CarDataset(Dataset):
         # Apply image transformation for inception 
         self.tf = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize((299, 299)),
+            transforms.Resize(size),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
 
-        print('Loading data...')
-        # self.X = [tf(plt.imread(file)) for file in self.files]
         self.X = self.files
         self.y = self.labels
 
-        print('Done loading data.')
         classes = [
             'Unknown', 'Compacts', 'Sedans', 'SUVs', 'Coupes',
             'Muscle', 'SportsClassics', 'Sports', 'Super', 'Motorcycles',

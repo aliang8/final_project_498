@@ -16,46 +16,57 @@ from torchvision import datasets, models, transforms
 import torch.nn as nn
 from glob import glob
 
-def predict(data_loader, model):
+def predict(data_loader_1, data_loader_2, model_1, model_2):
     """
     Runs the model inference on the test set and outputs the predictions
     """
     model_pred = np.array([])
-    for i, X in enumerate(data_loader):
+    for X_1, X_2 in zip(data_loader_1, data_loader_2):
         if torch.cuda.is_available():
-            X = X.cuda()
-        output = model(X)
-        predicted = predictions(output[0].data).cpu()
-        predicted = predicted.numpy()
+            X_1 = X_1.cuda()
+            X_2 = X_2.cuda()
+        output_1 = model_1(X_1)
+        output_2 = model_2(X_2)
+        predicted_1 = predictions(output_1[0].data).cpu().numpy()
+        predicted_2 = predictions(output_2.data).cpu().numpy()
+        predicted = np.round(.7 * predicted_1 + .3 * predicted_2)
         model_pred = np.concatenate([model_pred, predicted])
 
-        del X
+        del X_1, X_2
     return model_pred
 
 def main():
     # data loaders
-    _, _, te_loader, get_semantic_label = get_train_val_test_loaders(num_classes=config('inception_v3.num_classes'))
+    _, _, te_loader_inception, _ = get_train_val_test_loaders('inception_v3', num_classes=config('inception_v3.num_classes'))
 
-    print('Load pretrained ...')
+    _, _, te_loader_resnet, _ = get_train_val_test_loaders('resnet18', num_classes=config('resnet18.num_classes'))
 
-    # Load the pretrained model from pytorch
-    model = models.inception_v3(pretrained = True)
-    num_ftrs = model.fc.in_features
-    model.fc = torch.nn.Linear(num_ftrs, 2)
+    # Ensemble model~
+
+    # Load the pretrained model for inception
+    model_inception = models.inception_v3(pretrained = True)
+    num_ftrs = model_inception.fc.in_features
+    model_inception.fc = torch.nn.Linear(num_ftrs, 2)
+
+    model_resnet = models.resnet18(pretrained = True)
+    num_ftrs = model_resnet.fc.in_features
+    model_resnet.fc = torch.nn.Linear(num_ftrs, 2)
+
 
     # Attempts to restore the latest checkpoint if exists
-    model, _, _ = restore_checkpoint(model, config('inception_v3.checkpoint'))
+    model_inception, _, _ = restore_checkpoint(model_inception, config('inception_v3.checkpoint'))
+    model_resnet, _, _ = restore_checkpoint(model_resnet, config('resnet18.checkpoint'))
 
     if torch.cuda.is_available():
-        model = model.cuda()
+        model_inception = model_inception.cuda()
+        model_resnet = model_resnet.cuda()
 
     # Evaluate model
     files = glob('deploy/test/*/*_image.jpg')
 
-    model_pred = predict(te_loader, model)
-    model_pred[np.where(model_pred == 1)] = 2
-    model_pred[np.where(model_pred == 0)] = 1
-
+    model_pred = predict(te_loader_inception, te_loader_resnet, model_inception, model_resnet)
+    model_pred[np.where(model_pred == 1)] = int(2)
+    model_pred[np.where(model_pred == 0)] = int(1)
 
     print('saving challenge predictions...\n')
 

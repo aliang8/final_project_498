@@ -1,7 +1,7 @@
 """
 EECS 498 - Self Driving Cars
 University of Michigan
-Training file for Inceptionv3 model
+Training file for resnet model
 """
 
 import torch
@@ -40,7 +40,7 @@ def _train_epoch(data_loader, model, criterion, optimizer):
 
         # forward + backward + optimize
         output = model(X)
-        loss = criterion(output[0], y)
+        loss = criterion(output, y)
         loss.backward()
         optimizer.step()
 
@@ -59,7 +59,7 @@ def _evaluate_epoch(tr_loader, va_loader, model, criterion, epoch, stats):
                 X = X.cuda()
                 y = y.cuda()
 
-            output = model(X)[0]
+            output = model(X)
             predicted = predictions(output.data)
             y_true.append(y)
             y_pred.append(predicted)
@@ -80,7 +80,7 @@ def _evaluate_epoch(tr_loader, va_loader, model, criterion, epoch, stats):
                 X = X.cuda()
                 y = y.cuda()
 
-            output = model(X)[0]
+            output = model(X)
             predicted = predictions(output.data)
             y_true.append(y)
             y_pred.append(predicted)
@@ -99,30 +99,27 @@ def _evaluate_epoch(tr_loader, va_loader, model, criterion, epoch, stats):
     print('Val acc: {}'.format(val_acc))
     print('Val loss: {}'.format(val_loss))
 
-def train_inception():
-    tr_loader, va_loader, te_loader, _ = get_train_val_test_loaders('inception_v3', num_classes=config('inception_v3.num_classes'))
+def train_resnet():
+    tr_loader, va_loader, te_loader, _ = get_train_val_test_loaders('resnet18', num_classes=config('resnet18.num_classes'))
 
     # Load the pretrained model from pytorch
-    model = torchvision.models.inception_v3(pretrained=True)
+    model = torchvision.models.resnet18(pretrained=True)
     num_ftrs = model.fc.in_features
     model.fc = torch.nn.Linear(num_ftrs, 2)
         
     # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=config('inception_v3.learning_rate'), weight_decay=0.0005)
+    optimizer = optim.Adam(model.parameters(), lr=config('resnet18.learning_rate'), weight_decay=0.0005)
 
     print('Restore checkpoint...')
-    model, start_epoch, stats = restore_checkpoint(model, config('inception_v3.checkpoint'))
+    model, start_epoch, stats = restore_checkpoint(model, config('resnet18.checkpoint'))
 
     # Use GPU
     if use_gpu:
         model.cuda() 
 
     # Loop over the entire dataset multiple times
-    for epoch in range(start_epoch, config('inception_v3.num_epochs')):
-
-        # scheduler.step()
-
+    for epoch in range(start_epoch, config('resnet18.num_epochs')):
         print('Training Epoch: {}'.format(epoch))
         start = time.time()
 
@@ -140,4 +137,4 @@ def train_inception():
         print('Time for evaluating: {}'.format(time.time() - start))
 
         # Save model parameters
-        save_checkpoint(model, epoch+1, config('inception_v3.checkpoint'), stats)
+        save_checkpoint(model, epoch+1, config('resnet18.checkpoint'), stats)
